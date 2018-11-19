@@ -1,27 +1,27 @@
 package fr.difinamic.formation.tp1app;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.ColorInt;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button buttonDigit0, buttonDigit1, buttonDigit2, buttonDigit3, buttonDigit4,
-        buttonDigit5, buttonDigit6, buttonDigit7, buttonDigit8, buttonDigit9,
-        buttonDigitPlus, buttonDigitSous, buttonDigitMult, buttonDigitDiv,
-        buttonDigitEqual, buttonDigitC, buttonDigitDot;
-
+    // Text view to show typing caracters and show resuslts of operation
     private TextView textResults;
-
+    // Variable to save first member value of an operation
     private Double previousValue = 0.0;
-
+    // Variable to save the operator specified by the user
     private String operator;
 
+    // Function to resolve equation
     private Double resolve(Double a, Double b, String op) {
         double result = 0.0;
         switch (op) {
@@ -37,32 +37,14 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //
         textResults = (TextView) findViewById(R.id.text_results);
 
-        buttonDigit0 = (Button) findViewById(R.id.button_digit0);
-        buttonDigit1 = (Button) findViewById(R.id.button_digit1);
-        buttonDigit2 = (Button) findViewById(R.id.button_digit2);
-        buttonDigit3 = (Button) findViewById(R.id.button_digit3);
-        buttonDigit4 = (Button) findViewById(R.id.button_digit4);
-        buttonDigit5 = (Button) findViewById(R.id.button_digit5);
-        buttonDigit6 = (Button) findViewById(R.id.button_digit6);
-        buttonDigit7 = (Button) findViewById(R.id.button_digit7);
-        buttonDigit8 = (Button) findViewById(R.id.button_digit8);
-        buttonDigit9 = (Button) findViewById(R.id.button_digit9);
-        buttonDigitPlus = (Button) findViewById(R.id.button_digitPlus);
-        buttonDigitSous = (Button) findViewById(R.id.button_digitSous);
-        buttonDigitMult = (Button) findViewById(R.id.button_digitMult);
-        buttonDigitDiv = (Button) findViewById(R.id.button_digitDiv);
-        buttonDigitEqual = (Button) findViewById(R.id.button_digitEqual);
-        buttonDigitC = (Button) findViewById(R.id.button_digitC);
-        buttonDigitDot = (Button) findViewById(R.id.button_digitDot);
-
+        // Definition of a listener to set the behavior of digit buttons
         View.OnClickListener onDigitListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,35 +59,49 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        buttonDigit0.setOnClickListener(onDigitListener);
-        buttonDigit1.setOnClickListener(onDigitListener);
-        buttonDigit2.setOnClickListener(onDigitListener);
-        buttonDigit3.setOnClickListener(onDigitListener);
-        buttonDigit4.setOnClickListener(onDigitListener);
-        buttonDigit5.setOnClickListener(onDigitListener);
-        buttonDigit6.setOnClickListener(onDigitListener);
-        buttonDigit7.setOnClickListener(onDigitListener);
-        buttonDigit8.setOnClickListener(onDigitListener);
-        buttonDigit9.setOnClickListener(onDigitListener);
-
-
+        // Definition of a listener to set the behavior of operator buttons
         View.OnClickListener onOperatorListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!textResults.getText().toString().isEmpty()) {
-                    previousValue = Double.parseDouble(textResults.getText().toString());
+                    if (operator != null) {
+                        previousValue = resolve(previousValue, Double.parseDouble(textResults.getText().toString()), operator);
+                    } else {
+                        previousValue = Double.parseDouble(textResults.getText().toString());
+                    }
                     operator = ((Button) v).getText().toString();
                     textResults.setText("0");
                 }
             }
         };
 
-        buttonDigitPlus.setOnClickListener(onOperatorListener);
-        buttonDigitSous.setOnClickListener(onOperatorListener);
-        buttonDigitMult.setOnClickListener(onOperatorListener);
-        buttonDigitDiv.setOnClickListener(onOperatorListener);
+        // Get all digit and operator button and add corresponding listener
+        findViewById(R.id.button_digit0).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit1).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit2).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit3).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit4).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit5).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit6).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit7).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit8).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digit9).setOnClickListener(onDigitListener);
+        findViewById(R.id.button_digitPlus).setOnClickListener(onOperatorListener);
+        findViewById(R.id.button_digitSous).setOnClickListener(onOperatorListener);
+        findViewById(R.id.button_digitMult).setOnClickListener(onOperatorListener);
+        findViewById(R.id.button_digitDiv).setOnClickListener(onOperatorListener);
 
-        buttonDigitDot.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.button_info).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentInfo = new Intent(MainActivity.this, InfoActivity.class);
+                intentInfo.putExtra("infos", "infos");
+                startActivity(intentInfo);
+            }
+        });
+
+        // Get dot button and a listener
+        findViewById(R.id.button_digitDot).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!textResults.getText().toString().contains(".")) {
@@ -114,10 +110,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonDigitC.setOnClickListener(v -> {textResults.setText(""); previousValue = 0.0; operator = null;});
+        // Get cancel button and a listener
+        findViewById(R.id.button_digitC).setOnClickListener(v -> {
+            textResults.setText("");
+            previousValue = 0.0; operator = null;
+        });
 
-
-        buttonDigitEqual.setOnClickListener(new View.OnClickListener() {
+        // Get equal button and a listener
+        findViewById(R.id.button_digitEqual).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 

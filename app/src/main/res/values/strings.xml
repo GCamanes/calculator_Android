@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">TP1App</string>
+    <string name="app_name">Ma calculatrice</string>
+    <string name="title_activity_info">Infos sur ma calculette</string>
 </resources>
