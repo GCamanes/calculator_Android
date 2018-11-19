@@ -3,6 +3,7 @@ package fr.difinamic.formation.tp1app;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.annotation.ColorInt;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     // Text view to show typing caracters and show resuslts of operation
@@ -20,6 +23,13 @@ public class MainActivity extends AppCompatActivity {
     private Double previousValue = 0.0;
     // Variable to save the operator specified by the user
     private String operator;
+
+    // Keys to communicate between view portrait and landscape
+    private final String textKey= "text";
+    private final String previousValueKey = "previousValue";
+    private final String operatorKey = "operator";
+
+    private ArrayList<Equation> historic = new ArrayList<Equation>();
 
     // Function to resolve equation
     private Double resolve(Double a, Double b, String op) {
@@ -34,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
             case "/":
                 result = a / b; break;
         }
+
+        historic.add(new Equation(a, b, result, op));
         return result;
     }
 
@@ -43,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
 
         //
         textResults = (TextView) findViewById(R.id.text_results);
+
+        if (savedInstanceState != null) {
+            textResults.setText(savedInstanceState.getString("text"));
+            previousValue = savedInstanceState.getDouble("previousValue");
+            operator = savedInstanceState.getString("operator");
+        }
 
         // Definition of a listener to set the behavior of digit buttons
         View.OnClickListener onDigitListener = new View.OnClickListener() {
@@ -95,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intentInfo = new Intent(MainActivity.this, InfoActivity.class);
-                intentInfo.putExtra("infos", "infos");
+                intentInfo.putParcelableArrayListExtra("historic", MainActivity.this.historic);
                 startActivity(intentInfo);
             }
         });
@@ -129,7 +147,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    // Function save data (called when onCreate() is called)
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
+        outState.putString(textKey, textResults.getText().toString());
+        outState.putDouble(previousValueKey, MainActivity.this.previousValue);
+        outState.putString(operatorKey, MainActivity.this.operator);
     }
 }
