@@ -1,18 +1,18 @@
 package fr.difinamic.formation.tp1app;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.PersistableBundle;
-import android.support.annotation.ColorInt;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
+
+import io.sentry.Sentry;
+import io.sentry.android.AndroidSentryClientFactory;
+import io.sentry.context.Context;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -53,6 +53,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        android.content.Context ctx = this.getApplicationContext();
+
+        // Use the Sentry DSN (client key) from the Project Settings page on Sentry
+        String sentryDsn = "https://9922bc1aa7394849a17ed40f223f850b@sentry.io/1365605";
+        Sentry.init(sentryDsn, new AndroidSentryClientFactory(ctx));
+
+
         //
         textResults = (TextView) findViewById(R.id.text_results);
 
@@ -66,7 +74,14 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener onDigitListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Sentry.getContext().recordBreadcrumb(
+                    new BreadcrumbBuilder().setMessage("User tap on a digit").build()
+                );
+
                 String stringToAdd = ((Button) v).getText().toString();
+
+                Sentry.capture("digit " + stringToAdd);
 
                 if (textResults.getText().equals("0")) {
                     textResults.setText(stringToAdd);
